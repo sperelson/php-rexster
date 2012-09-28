@@ -104,7 +104,9 @@ class RexsterGraph
         $this->client = $client;
         $this->name = $data['name'];
         $this->type = $data['type'];
-        $this->extensions = $data['extensions'];
+        if(isset($data['extensions'])) {
+            $this->extensions = $data['extensions'];
+        }
     }
     
     
