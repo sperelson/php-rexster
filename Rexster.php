@@ -45,46 +45,54 @@ class Rexster
      * @param array $params
      * @param bool $as_json if true and the method is POST, then post $params as JSON
      */
-    public function call($method, $path, $params=null, $as_json=false)
-    {
-        $opts = array(
-            'http' => array(
-                'method' => $method,
-                'header' => "Accept: application/json\r\n"
-            )
-        );
-        
+    public function call($method, $path, $params=null, $as_json=false) {
         $url = $this->base_url.$path;
-        
-        if ($params)
-        {
-            if ($method == 'POST' && $as_json)
-            {
-                $opts['http']['header'] .= "Content-Type: application/json\r\n";
-                $opts['http']['content'] = json_encode($params);
+        //$headers = array('Accept: application/vnd.rexster-v1+json','Content-Type: text/plain');
+        $headers = array('Accept: application/json');
+
+        if ($params) {
+            if ($method == 'POST' && $as_json) {
+                $headers = array('Accept: application/json');
+                $params = json_encode($params);
+            } else {
+                if ($method == 'POST') {
+                    $paramcount = count($params);
+                    $params = http_build_query($params);
+                }
             }
-            else
-            {
-                $url .= '?'.http_build_query($params);
-            }
+        }        
+    
+        $options = array(
+            CURLOPT_RETURNTRANSFER  => 1,           // return web page
+            CURLOPT_HTTPHEADER      => $headers,
+            CURLOPT_HEADER          => 0,           // don't return headers
+            CURLOPT_FOLLOWLOCATION  => 1,           // follow redirects
+            CURLOPT_ENCODING        => "",          // handle all encodings
+            CURLOPT_AUTOREFERER     => 1,           // set referrer on redirect
+            CURLOPT_CONNECTTIMEOUT  => 20,          // timeout on connect
+            CURLOPT_TIMEOUT         => 35,          // timeout on response
+            CURLOPT_MAXREDIRS       => 10           // stop after 10 redirects
+        );
+        $curl = curl_init($url);
+        curl_setopt_array($curl, $options);
+
+        if ($method == 'POST') {
+            curl_setopt($curl, CURLOPT_POST      ,1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS    ,$params);
         }
-        
-        $ctx = stream_context_create($opts);
-        $res = file_get_contents($url, false, $ctx);
-        
-        if (!preg_match('@2[0-9]{2}@', $http_response_header[0]))
-        {
-            $res = json_decode($res, true);
-            
-            if ($res && isset($res['message']))
-            {
-                throw new Exception($res['message']);
-            }
-            
-            throw new Exception($method.' '.$path.' : '.$http_response_header[0]);
+        if ($method != 'GET') {
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
         }
-        
-        return json_decode($res, true);
+        $text = curl_exec($curl);
+        $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $errno = curl_errno($curl);
+        curl_close($curl);
+
+        if ($httpcode >= 200 && $httpcode < 300) {
+            return json_decode($text, true);
+        } else {
+            return NULL;
+        }
     }
 }
 
