@@ -6,7 +6,7 @@ class Rexster
 {
     public $base_url;
     
-    public function __construct($base_url='http://localhost:8182')
+    public function __construct($base_url='http://localhost:8182/graphs')
     {
         $this->base_url = $base_url;
     }
