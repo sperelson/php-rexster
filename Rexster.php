@@ -31,10 +31,13 @@ class Rexster
      */
     public function get_graph($name)
     {
-        return new RexsterGraph(
-            $this,
-            $this->call('GET', '/'.$name)
-        );
+        $graph = $this->call('GET', '/' . $name);
+
+        if (isset($graph)) {
+            return new RexsterGraph($this, $graph);
+        } else {
+            return null;
+        }
     }
     
     /**
