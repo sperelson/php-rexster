@@ -512,6 +512,3 @@ class RexsterIndex
         return $data['results'];
     }
 }
-
-?>
-
