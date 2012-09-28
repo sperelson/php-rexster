@@ -64,7 +64,7 @@ class Rexster
 					$params = http_build_query($params);
 				}
 			}
-		}		 
+		}
 	
 		$options = array(
 			CURLOPT_RETURNTRANSFER	=> 1,			// return web page
