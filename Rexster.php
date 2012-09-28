@@ -5,6 +5,7 @@
 class Rexster
 {
     public $base_url;
+    private $curl;
     
     public function __construct($base_url='http://localhost:8182/graphs')
     {
@@ -76,23 +77,25 @@ class Rexster
             CURLOPT_TIMEOUT         => 35,          // timeout on response
             CURLOPT_MAXREDIRS       => 10           // stop after 10 redirects
         );
-        $curl = curl_init($url);
-        curl_setopt_array($curl, $options);
-
-        if ($method == 'POST') {
-            curl_setopt($curl, CURLOPT_POST      ,1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS    ,$params);
-        }
-        if ($method != 'GET') {
-            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-        }
-        $text = curl_exec($curl);
-        $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $errno = curl_errno($curl);
-        curl_close($curl);
-
-        if ($httpcode >= 200 && $httpcode < 300) {
-            return json_decode($text, true);
+        if (isset($this->curl) || $this->curl = curl_init($url)) {
+            curl_setopt_array($this->curl, $options);
+        
+            if ($method == 'POST') {
+                curl_setopt($this->curl, CURLOPT_POST      ,1);
+                curl_setopt($this->curl, CURLOPT_POSTFIELDS    ,$params);
+            }
+            if ($method != 'GET') {
+                curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, $method);
+            }
+            $text = curl_exec($this->curl);
+            $httpcode = curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
+            $errno = curl_errno($this->curl);
+        
+            if ($httpcode >= 200 && $httpcode < 300) {
+                return json_decode($text, true);
+            } else {
+                return NULL;
+            }
         } else {
             return NULL;
         }
