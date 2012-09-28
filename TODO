@@ -1,1 +1,1 @@
-* Use cURL if available for persistent connections
+* Use cURL if available for persistent connections -- DONE, but requires testing
